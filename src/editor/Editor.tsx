@@ -9,6 +9,10 @@ export interface EditorState {
   errors: string;
 }
 export type EditorProps = {
+  CustomEditor: React.ComponentType<{
+    onChange: Function;
+    value: string | undefined;
+  }>;
   editorVisible: boolean;
   schema?: string;
   graphController?: (controller: GraphController) => void;
@@ -69,6 +73,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
       <>
         {this.props.editorVisible === true && (
           <CodeEditor
+            CustomEditor={this.props.CustomEditor}
             controller={this.controller}
             schema={this.state.code}
             stitches={this.state.stitches}

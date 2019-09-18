@@ -2,20 +2,24 @@ import * as cx from 'classnames';
 import * as React from 'react';
 import * as styles from './style/Code';
 
-import { buildASTSchema, parse } from 'graphql';
-import AceEditor from 'react-ace';
+// import { buildASTSchema, parse } from 'graphql';
+// import AceEditor from 'react-ace';
 import { GraphController } from '../Graph';
 import { sizeSidebar } from '../vars';
-import './ace/graphqleditor';
-import './ace/graphqlschema';
+// import './ace/graphqleditor';
+// import './ace/graphqlschema';
 import { SelectLanguage } from './SelectLanguage';
-require(`brace/ext/searchbox`);
+// require(`brace/ext/searchbox`);
 export interface CodeEditorOuterProps {
   schemaChanged?: (schema: string) => void;
   readonly?: boolean;
 }
 
 export type CodeEditorProps = {
+  CustomEditor: React.ComponentType<{
+    onChange: Function;
+    value: string | undefined;
+  }>;
   schema: string;
   stitches?: string;
   controller: GraphController;
@@ -47,7 +51,7 @@ export class CodeEditor extends React.Component<CodeEditorProps, CodeEditorState
   public startX?: number;
   public refSidebar?: HTMLDivElement;
   public refHandle?: HTMLDivElement;
-  public aceEditorRef?: AceEditor;
+  // public aceEditorRef?: AceEditor;
   public state: CodeEditorState = {
     loadingUrl: false,
     canMountAce: false
@@ -57,7 +61,7 @@ export class CodeEditor extends React.Component<CodeEditorProps, CodeEditorState
   public width = sizeSidebar;
   public lastSchema?: string;
   public holder?: HTMLDivElement;
-  public editor?: AceEditor;
+  // public editor?: AceEditor;
   public componentWillMount() {
     this.lastSchema = this.props.schema;
   }
@@ -68,6 +72,7 @@ export class CodeEditor extends React.Component<CodeEditorProps, CodeEditorState
     }
   }
   public render() {
+    const { CustomEditor } = this.props;
     return (
       <>
         <div
@@ -83,7 +88,8 @@ export class CodeEditor extends React.Component<CodeEditorProps, CodeEditorState
               onGenerate={() =>
                 this.lastSchema && this.props.controller.loadGraphQL(this.lastSchema)
               }
-              generateVisible={!!this.lastSchema && !this.state.error && !this.state.errors}
+              generateVisible={!!this.lastSchema}
+              // generateVisible={!!this.lastSchema && !this.state.error && !this.state.errors}
             />
           )}
           <div
@@ -91,14 +97,16 @@ export class CodeEditor extends React.Component<CodeEditorProps, CodeEditorState
             ref={(ref) => {
               if (ref && !this.holder) {
                 this.holder = ref;
-                setTimeout(() => {
-                  (this.aceEditorRef as any).editor.resize();
-                }, 1);
+                // TODO: editor.resize();
+                // setTimeout(() => {
+                //   (this.aceEditorRef as any).editor.resize();
+                // }, 1);
               }
             }}
           >
-            {this.state.error && <div className={styles.ErrorLonger}>{this.state.error}</div>}
-            <AceEditor
+            {/* {this.state.error && <div className={styles.ErrorLonger}>{this.state.error}</div>} */}
+            {<CustomEditor onChange={this.codeChange} value={this.lastSchema} />}
+            {/* <AceEditor
               ref={(ref) => {
                 if (ref) {
                   this.aceEditorRef = ref;
@@ -121,7 +129,7 @@ export class CodeEditor extends React.Component<CodeEditorProps, CodeEditorState
               }}
               theme={'graphqleditor'}
               value={this.lastSchema}
-            />
+            /> */}
           </div>
           <div
             ref={(ref) => {
@@ -155,7 +163,8 @@ export class CodeEditor extends React.Component<CodeEditorProps, CodeEditorState
                 this.width = this.maximumDrag;
               }
               this.refSidebar!.style.width = this.refSidebar!.style.flexBasis = `${this.width}px`;
-              (this.aceEditorRef as any).editor.container.style.width = `${this.width}px`;
+              // TODO: this.props.onDragOver
+              // (this.aceEditorRef as any).editor.container.style.width = `${this.width}px`;
               this.props.onResized();
             }}
             onDragEnd={(e) => {
@@ -183,8 +192,12 @@ export class CodeEditor extends React.Component<CodeEditorProps, CodeEditorState
     );
   }
 
-  private get minimumDrag() { return window.innerWidth * 0.15; }
-  private get maximumDrag() { return window.innerWidth * 0.85; }
+  private get minimumDrag() {
+    return window.innerWidth * 0.15;
+  }
+  private get maximumDrag() {
+    return window.innerWidth * 0.85;
+  }
 
   private codeChange = (
     e: string,
@@ -205,42 +218,43 @@ export class CodeEditor extends React.Component<CodeEditorProps, CodeEditorState
       this.props.schemaChanged(e);
     }
     this.lastSchema = e;
-    const combinedCode = (this.props.stitches || '') + e;
-    try {
-      const parsed = parse(combinedCode);
-      try {
-        buildASTSchema(parsed);
-        if (this.state.errors || this.state.error) {
-          this.setState({
-            errors: undefined,
-            error: undefined
-          });
-        }
-      } catch (error) {
-        this.setState({
-          error: error.message
-        });
-      }
-    } catch (error) {
-      const er = error as {
-        locations: Array<{
-          line: number;
-          column: number;
-        }>;
-        message: string;
-        positions: number[];
-      };
-      this.setState({
-        errors: [
-          {
-            column: er.locations[0]!.column - 1,
-            row: er.locations[0]!.line - 1,
-            text: er.message,
-            type: 'error',
-            position: er.positions[0]
-          }
-        ]
-      });
-    }
-  }
+    // TODO: Pull in diagnostics from monaco
+    // const combinedCode = (this.props.stitches || '') + e;
+    // try {
+    //   const parsed = parse(combinedCode);
+    //   try {
+    //     buildASTSchema(parsed);
+    //     if (this.state.errors || this.state.error) {
+    //       this.setState({
+    //         errors: undefined,
+    //         error: undefined
+    //       });
+    //     }
+    //   } catch (error) {
+    //     this.setState({
+    //       error: error.message
+    //     });
+    //   }
+    // } catch (error) {
+    //   const er = error as {
+    //     locations: Array<{
+    //       line: number;
+    //       column: number;
+    //     }>;
+    //     message: string;
+    //     positions: number[];
+    //   };
+    //   this.setState({
+    //     errors: [
+    //       {
+    //         column: er.locations[0]!.column - 1,
+    //         row: er.locations[0]!.line - 1,
+    //         text: er.message,
+    //         type: 'error',
+    //         position: er.positions[0]
+    //       }
+    //     ]
+    //   });
+    // }
+  };
 }
