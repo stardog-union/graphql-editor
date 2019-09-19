@@ -74,16 +74,12 @@ export class Editor extends React.Component<EditorProps, EditorState> {
             CustomEditor={this.props.CustomEditor}
             controller={this.controller}
             schema={this.state.code}
-            stitches={this.state.stitches}
             readonly={this.props.readonly}
             onResized={this.controller.resizeDiagram}
-            schemaChanged={(e) => {
+            schemaChanged={(code) => {
               this.setState({
-                code: e
+                code
               });
-              if (this.props.schemaChanged) {
-                this.props.schemaChanged(e);
-              }
             }}
           />
         )}

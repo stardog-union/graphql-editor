@@ -6,18 +6,17 @@ import { sizeSidebar } from '../vars';
 import { SelectLanguage } from './SelectLanguage';
 
 export interface CustomEditorProps {
-  onChange: Function;
+  onChange: (schema: string) => void;
   value: string | undefined;
 }
 export interface CodeEditorOuterProps {
   CustomEditor: React.ComponentType<CustomEditorProps>;
-  schemaChanged?: (schema: string) => void;
   readonly?: boolean;
   generateHidden?: boolean;
 }
 export type CodeEditorProps = {
   schema: string;
-  stitches?: string;
+  schemaChanged: (schema: string) => void;
   controller: GraphController;
   onResized: () => void;
 } & CodeEditorOuterProps;
@@ -97,20 +96,20 @@ export class CodeEditor extends React.Component<CodeEditorProps, CodeEditorState
             className={cx(styles.Resizer, {
               drag: this.state.isResizing
             })}
-            onDragStart={(e) => {
-              e.dataTransfer.setData('id', 'dragging');
+            onDragStart={(evt) => {
+              evt.dataTransfer.setData('id', 'dragging');
               this.dragging = true;
               // this.refHandle!.style.left = '0px';
               this.setState({
                 isResizing: true
               });
             }}
-            onDrag={(e) => {
+            onDrag={() => {
               this.dragging = true;
             }}
-            onDragOver={(e) => {
-              this.startX = this.startX || e.clientX;
-              const deltaX = e.clientX - this.startX;
+            onDragOver={(evt) => {
+              this.startX = this.startX || evt.clientX;
+              const deltaX = evt.clientX - this.startX;
               this.width = this.startWidth + deltaX;
               if (this.width < this.minimumDrag) {
                 this.width = this.minimumDrag;
@@ -121,7 +120,7 @@ export class CodeEditor extends React.Component<CodeEditorProps, CodeEditorState
               this.refSidebar!.style.width = this.refSidebar!.style.flexBasis = `${this.width}px`;
               this.props.onResized();
             }}
-            onDragEnd={(e) => {
+            onDragEnd={() => {
               this.dragging = false;
               this.startX = undefined;
               this.startWidth = this.width;
@@ -153,10 +152,10 @@ export class CodeEditor extends React.Component<CodeEditorProps, CodeEditorState
     return window.innerWidth * 0.85;
   }
 
-  private codeChange = (e: string) => {
+  private codeChange = (schema: string) => {
     if (!this.lastSchema && this.props.schemaChanged) {
-      this.props.schemaChanged(e);
+      this.props.schemaChanged(schema);
     }
-    this.lastSchema = e;
+    this.lastSchema = schema;
   };
 }
