@@ -2,17 +2,15 @@ import * as React from 'react';
 import { GraphController } from '../Graph';
 import { CodeEditor, CodeEditorOuterProps } from './Code';
 import * as styles from './style/Editor';
+
 export interface EditorState {
   projectId?: string;
   code: string;
   stitches?: string;
   errors: string;
 }
+
 export type EditorProps = {
-  CustomEditor: React.ComponentType<{
-    onChange: Function;
-    value: string | undefined;
-  }>;
   editorVisible: boolean;
   schema?: string;
   graphController?: (controller: GraphController) => void;
@@ -35,10 +33,10 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   private containerRef = React.createRef<HTMLDivElement>();
   receiveSchema = (code: string, stitches?: string) => {
     this.setState({ code, stitches, errors: '' });
-  }
+  };
   receiveErrors = (errors: string) => {
     this.setState({ errors });
-  }
+  };
   componentDidMount() {
     window.requestAnimationFrame(() => {
       // We should wait for next animation frame so TypeStyle
@@ -71,7 +69,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
   render() {
     return (
       <>
-        {this.props.editorVisible === true && (
+        {this.props.editorVisible && (
           <CodeEditor
             CustomEditor={this.props.CustomEditor}
             controller={this.controller}
@@ -94,7 +92,7 @@ export class Editor extends React.Component<EditorProps, EditorState> {
             maxHeight: '100%',
             maxWidth: '100%',
             height: '100vh',
-            flex: '1',
+            flex: '1'
           }}
           ref={this.containerRef}
         />
